@@ -6,8 +6,10 @@ export default uiRegistry({
   order: ['order'],
   constructor() {
     this.forEach(docView => {
-      docView.shouldShow = docView.shouldShow || _.constant(true);
-      docView.name = docView.name || docView.title;
+      if (docView.title !== 'JSON') {
+	    docView.shouldShow = docView.shouldShow || _.constant(true);
+	    docView.name = docView.name || docView.title;
+  	  }
     });
   }
 });
