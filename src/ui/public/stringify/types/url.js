@@ -59,19 +59,20 @@ export default function UrlFormatProvider(Private, highlightFilter) {
     { id: 'img', name: 'Image' }
   ];
 
-  Url.prototype._formatUrl = function (value) {
+  Url.prototype._formatUrl = function (value, hit) {
     let template = this.param('urlTemplate');
     if (!template) return value;
 
     return this._compileTemplate(template)({
       value: encodeURIComponent(value),
-      rawValue: value
+      rawValue: value,
+      hit: hit
     });
   };
 
-  Url.prototype._formatLabel = function (value, url) {
+  Url.prototype._formatLabel = function (value, url, hit) {
     let template = this.param('labelTemplate');
-    if (url == null) url = this._formatUrl(value);
+    if (url == null) url = this._formatUrl(value, hit);
     if (!template) return url;
 
     return this._compileTemplate(template)({
@@ -86,8 +87,8 @@ export default function UrlFormatProvider(Private, highlightFilter) {
     },
 
     html: function (rawValue, field, hit) {
-      let url = _.escape(this._formatUrl(rawValue));
-      let label = _.escape(this._formatLabel(rawValue, url));
+      let url = _.escape(this._formatUrl(rawValue, hit));
+      let label = _.escape(this._formatLabel(rawValue, url, hit));
 
       switch (this.param('type')) {
         case 'img':
@@ -117,6 +118,11 @@ export default function UrlFormatProvider(Private, highlightFilter) {
           if (locals.hasOwnProperty(parts[i])) {
             let local = locals[parts[i]];
             output += local == null ? '' : local;
+          } else {
+            if (locals.hit) {
+              let local = locals.hit._source[parts[i]];
+              output += local == null ? '' : local;
+            }
           }
         } else {
           output += parts[i];
