@@ -92,12 +92,13 @@ module.directive('kbnTableRow', function ($compile) {
           openRowHtml
         ];
 
-        if (indexPattern.timeFieldName) {
-          newHtmls.push(cellTemplate({
-            timefield: true,
-            formatted: _displayField(row, indexPattern.timeFieldName)
-          }));
-        }
+        // PAC Feature: Default time field is not needed in table
+        // if (indexPattern.timeFieldName) {
+        //   newHtmls.push(cellTemplate({
+        //     timefield: true,
+        //     formatted: _displayField(row, indexPattern.timeFieldName)
+        //   }));
+        // }
 
         $scope.columns.forEach(function (column) {
           newHtmls.push(cellTemplate({
