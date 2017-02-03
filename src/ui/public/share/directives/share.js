@@ -68,7 +68,7 @@ app.directive('share', function (Private) {
       };
 
       function getSnapshotUrl() {
-        const url = $location.absUrl();
+        const url = $location.absUrl().replace(/options:\([^\)]*\),/g, '');
         // Replace hashes with original RISON values.
         return unhashUrl(url, getUnhashableStates());
       }
