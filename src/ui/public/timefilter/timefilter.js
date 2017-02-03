@@ -78,16 +78,18 @@ uiModules
 
   Timefilter.prototype.get = function (indexPattern) {
     let filter;
-    let timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});
+    if (!_.isUndefined(indexPattern)) {
+      let timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});
 
-    if (timefield) {
-      let bounds = this.getBounds();
-      filter = {range : {}};
-      filter.range[timefield.name] = {
-        gte: bounds.min.valueOf(),
-        lte: bounds.max.valueOf(),
-        format: 'epoch_millis'
-      };
+      if (timefield) {
+        let bounds = this.getBounds();
+        filter = {range : {}};
+        filter.range[timefield.name] = {
+          gte: bounds.min.valueOf(),
+          lte: bounds.max.valueOf(),
+          format: 'epoch_millis'
+        };
+      }
     }
 
     return filter;
