@@ -11,7 +11,7 @@ import uiModules from 'ui/modules';
 
 
 uiModules.get('kibana')
-.directive('docTable', function (config, Notifier, getAppState) {
+.directive('docTable', function (config, Notifier, getAppState, Private) {
   return {
     restrict: 'E',
     template: html,
@@ -24,8 +24,67 @@ uiModules.get('kibana')
       infiniteScroll: '=?',
       filter: '=?',
     },
-    link: function ($scope) {
+    controllerAs: 'docTableCSV',
+    controller: function ($scope) {
       let notify = new Notifier();
+
+      // PAC Feature: csv export functionality
+      let SearchSource = Private(require('ui/courier/data_source/search_source'));
+      let self = this;
+
+      self._saveAs = require('@spalger/filesaver').saveAs;
+      self.csv = {
+        separator: config.get('csv:separator'),
+        quoteValues: config.get('csv:quoteValues')
+      };
+
+      self.exportAsCsv = function (formatted) {
+        let searchSource = new SearchSource();
+        searchSource.set('filter', $scope.searchSource.getOwn('filter'));
+        searchSource.set('query', $scope.searchSource.getOwn('query'));
+        searchSource.size(10000);
+        searchSource.index($scope.searchSource.get('index'));
+        searchSource.onResults().then(function onResults(resp) {
+
+          // Abort if something changed
+          if ($scope.searchSource !== $scope.searchSource) return;
+
+          let csv = new Blob([self.toCsv(formatted, resp.hits.hits)], { type: 'text/plain' });
+          self._saveAs(csv, 'download.csv');
+
+        }).catch(notify.fatal);
+        searchSource.fetchQueued();
+      };
+
+      self.toCsv = function (formatted, rows) {
+        let csv = [];
+        //var rows = $scope.hits;
+        let columns = $scope.columns;
+        let nonAlphaNumRE = /[^a-zA-Z0-9]/;
+        let allDoubleQuoteRE = /"/g;
+
+        function escape(val) {
+          if (!formatted && _.isObject(val)) val = val.valueOf();
+          val = String(val);
+          if (self.csv.quoteValues && nonAlphaNumRE.test(val)) {
+            val = '"' + val.replace(allDoubleQuoteRE, '""') + '"';
+          }
+          return val;
+        }
+
+        csv.push(_.map(columns, function (col) {
+          return escape(col);
+        }).join(","));
+
+        _.forEach(rows, function (row) {
+          csv.push(_.map(columns, function (col) {
+            return escape(row._source[col]);
+          }).join(","));
+        });
+        return csv.join("\r\n") + "\r\n";
+      };
+      // PAC Feature: csv export functionality
+
       $scope.limit = 50;
       $scope.persist = {
         sorting: $scope.sorting,

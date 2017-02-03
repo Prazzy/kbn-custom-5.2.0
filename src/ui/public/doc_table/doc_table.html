@@ -1,6 +1,9 @@
 <div
   ng-if="hits.length"
   ng-class="{ loading: searchSource.activeFetchCount > 0 }">
+  <a class="small" ng-if="!infiniteScroll" ng-click="docTableCSV.exportAsCsv(true)">
+      Export <i aria-hidden="true" class="fa fa-download"></i> (Upto 50k Rows)
+  </a> 
   <paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
     <table class="kbn-table table" ng-if="indexPattern">
       <thead
