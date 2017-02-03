@@ -101,25 +101,26 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       $scope.$watch('state.$newFilters', function (filters) {
         if (!filters) return;
 
+        // PAC Feature: apply multiple filters automatically...
         // If filters is not undefined and the length is greater than
         // one we need to set the newFilters attribute and allow the
         // users to decide what they want to apply.
-        if (filters.length > 1) {
-          return mapFlattenAndWrapFilters(filters)
-          .then(function (results) {
-            extractTimeFilter(results).then(function (filter) {
-              $scope.changeTimeFilter = filter;
-            });
-            return results;
-          })
-          .then(filterOutTimeBasedFilter)
-          .then(function (results) {
-            $scope.newFilters = results;
-          });
-        }
+        // if (filters.length > 1) {
+        //   return mapFlattenAndWrapFilters(filters)
+        //   .then(function (results) {
+        //     extractTimeFilter(results).then(function (filter) {
+        //       $scope.changeTimeFilter = filter;
+        //     });
+        //     return results;
+        //   })
+        //   .then(filterOutTimeBasedFilter)
+        //   .then(function (results) {
+        //     $scope.newFilters = results;
+        //   });
+        // }
 
         // Just add single filters to the state.
-        if (filters.length === 1) {
+        if (filters.length >= 1) {
           Promise.resolve(filters).then(function (filters) {
             extractTimeFilter(filters)
             .then(function (timeFilter) {
