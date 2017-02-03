@@ -7,7 +7,8 @@
     app-title="chrome.getAppTitle()"
   ></global-nav>
 
-  <div class="app-wrapper" ng-class="{ 'hidden-chrome': !chrome.getVisible() }">
+  <!-- PAC Feature: hide left nav if getShowsAppLink is disabled. -->
+  <div class="app-wrapper" ng-class="{ 'hidden-chrome': !chrome.getVisible(), 'hidden-chrome': !chrome.getShowAppsLink() }">
     <div class="app-wrapper-panel">
       <kbn-notifications list="notifList"></kbn-notifications>
       <kbn-loading-indicator></kbn-loading-indicator>
