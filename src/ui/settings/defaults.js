@@ -110,7 +110,7 @@ export default function defaultSettingsProvider() {
     },
     'visualization:tileMap:WMSdefaults': {
       value: JSON.stringify({
-        enabled: false,
+        enabled: true,
         url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
         options: {
           version: '1.3.0',
