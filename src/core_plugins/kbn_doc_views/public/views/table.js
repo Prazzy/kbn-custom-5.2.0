@@ -19,7 +19,16 @@ docViewsRegistry.register(function () {
         $scope.mapping = $scope.indexPattern.fields.byName;
         $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
         $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
-        $scope.fields = _.keys($scope.flattened).sort();
+        // PAC Feature: show only fields of saved search in doc viewer
+        if ($scope.$root.chrome.getBreadcrumbs()) {
+          if (!$scope.$root.chrome.getBreadcrumbs()[0].startsWith('dashboard')) $scope.fields = _.keys($scope.flattened).sort();
+          else $scope.fields = $scope.columns;
+        } else if ($scope.$root.chrome.getInjected().kbnDefaultAppId) {
+          if ($scope.$root.chrome.getInjected().kbnDefaultAppId !== 'dashboard') $scope.fields = _.keys($scope.flattened).sort();
+        } else {
+          $scope.fields = $scope.columns;
+        }
+        // PAC Feature: show only fields of saved search in doc viewer
 
         $scope.toggleColumn = function (fieldName) {
           _.toggleInOut($scope.columns, fieldName);
