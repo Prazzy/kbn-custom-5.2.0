@@ -8,6 +8,7 @@ import MapMissingProvider from './map_missing';
 import MapQueryStringProvider from './map_query_string';
 import MapGeoBoundingBoxProvider from './map_geo_bounding_box';
 import MapScriptProvider from './map_script';
+import MapBoolProvider from './mapBool';
 import MapDefaultProvider from './map_default';
 export default function mapFilterProvider(Promise, Private) {
 
@@ -38,7 +39,8 @@ export default function mapFilterProvider(Promise, Private) {
     Private(MapQueryStringProvider),
     Private(MapGeoBoundingBoxProvider),
     Private(MapScriptProvider),
-    Private(MapDefaultProvider)
+    Private(MapDefaultProvider),
+    Private(MapQueryStringProvider)
   ];
 
   let noop = function () {

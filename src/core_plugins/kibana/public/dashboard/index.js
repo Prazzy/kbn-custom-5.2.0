@@ -59,6 +59,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
     controllerAs: 'dashboardApp',
     controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
+      const services = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;
       const queryFilter = Private(FilterBarQueryFilterProvider);
 
       const notify = new Notifier({
@@ -238,6 +239,82 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         $scope.refresh();
       };
 
+      // PAC Feature: collect all index fields added to a dashboard
+      $state.options.rebuildIndexFieldsList = true;
+      $scope.indexFieldNames = [];
+      $scope.indexPatterns = [];
+      $scope.searches = [];
+      $scope.getIndexFieldNames = function (indexPattern) {
+        courier.indexPatterns.get(indexPattern).then(function (index) {
+          let indexFields = index.fields.reduce(function (fields, field) {
+            if (field.filterable === true) {
+              fields[field.name] = field.type;
+            }
+            return fields;
+          }, {});
+          $scope.indexFieldNames = indexFields;
+        });
+      };
+
+      $scope.parsePanelVis = function () {
+        let panels = _.merge($scope.state.panels, $state.panels);
+        let visualizations = services.visualizations;
+
+        panels.forEach(function (panel) {
+          visualizations.get(panel.id)
+            .then(function (hit) {
+              if (hit) {
+                if (hit.savedSearchId) {
+                  $scope.getIndexFieldNamesBySearch(hit.savedSearchId);
+                }
+                else {
+                  let indexPat = JSON.parse(hit.kibanaSavedObjectMeta.searchSourceJSON).index;
+                  $scope.getIndexFieldNames(indexPat);
+                }
+              }
+            });
+        });
+      };
+
+      $scope.getIndexFieldNamesBySearch = function (searchName) {
+        let searches = services.searches;
+        searches.get(searchName)
+        .then(function (hit) {
+          if (hit) {
+            let indexPat = JSON.parse(hit.kibanaSavedObjectMeta.searchSourceJSON).index;
+            $scope.getIndexFieldNames(indexPat);
+          }
+        });
+
+      };
+
+      $scope.parsePanelSearches = function () {
+        let panels = _.merge($scope.state.panels, $state.panels);
+        let searches = services.searches;
+        panels.forEach(function (panel) {
+          searches.get(panel.id)
+          .then(function (hit) {
+            let indexPat = JSON.parse(hit.kibanaSavedObjectMeta.searchSourceJSON).index;
+            $scope.getIndexFieldNames(indexPat);
+          });
+        });
+      };
+
+      $scope.getIndexPatterns = function () {
+        $scope.searches = _.uniq($scope.searches);
+        let searches = services.searches;
+        $scope.searches.forEach(function (search) {
+          searches.find(search)
+          .then(function (hits) {
+            if (hits.hits.length > 0) $scope.indexPatterns.push(JSON.parse(hits.hits[0].kibanaSavedObjectMeta.searchSourceJSON).index);
+          });
+        });
+      };
+
+      if (!$scope.state.options.savedSearchOnly) $scope.parsePanelVis();
+      $scope.parsePanelSearches();
+      // PAC Feature: collect all index fields added to a dashboard
+
       $scope.save = function () {
         $state.save();
 
@@ -247,7 +324,10 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
         dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
         dash.refreshInterval = dash.timeRestore ? timeRestoreObj : undefined;
+        // PAC Feature: collect all index fields added to a dashboard
+        if ($state.options.rebuildIndexFieldsList) $state.options.fields = $scope.indexFieldNames;
         dash.optionsJSON = angular.toJson($state.options);
+        // PAC Feature: collect all index fields added to a dashboard
 
         dash.save()
         .then(function (id) {
@@ -282,11 +362,13 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       // called by the saved-object-finder when a user clicks a vis
       $scope.addVis = function (hit) {
+        $scope.parsePanelVis(); // PAC Feature: collect all index fields added to a dashboard
         pendingVis++;
         $state.panels.push(createPanelState(hit.id, 'visualization', getMaxPanelIndex()));
       };
 
       $scope.addSearch = function (hit) {
+        $scope.parsePanelSearches(); // PAC Feature: collect all index fields added to a dashboard
         pendingVis++;
         $state.panels.push(createPanelState(hit.id, 'search', getMaxPanelIndex()));
       };

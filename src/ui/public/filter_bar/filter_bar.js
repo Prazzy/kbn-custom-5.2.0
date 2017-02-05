@@ -8,6 +8,8 @@ import FilterBarLibExtractTimeFilterProvider from 'ui/filter_bar/lib/extract_tim
 import FilterBarLibFilterOutTimeBasedFilterProvider from 'ui/filter_bar/lib/filter_out_time_based_filter';
 import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/change_time_filter';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import filterEditor from 'ui/filter_editor/filter_editor';
+import 'ui/filters/display_filter';
 import uiModules from 'ui/modules';
 let module = uiModules.get('kibana');
 
@@ -37,12 +39,16 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
         'invertAll',
         'removeFilter',
         'removeAll',
-        'updateFilter'
+        'updateFilter',
+        'addNewFilter',
+        'displayFilter'
       ].forEach(function (method) {
         $scope[method] = queryFilter[method];
       });
 
       $scope.state = getAppState();
+      $scope.editor = 'visual';
+      $scope.showAddNewFilter = true;
 
       $scope.aceLoaded = function (editor) {
         editor.$blockScrolling = Infinity;
@@ -63,6 +69,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       };
 
       $scope.startEditingFilter = function (source) {
+        $scope.showAddNewFilter = false;
         return $scope.editingFilter = {
           source: source,
           type: _.findKey(source, function (val, key) {
@@ -75,6 +82,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
 
       $scope.stopEditingFilter = function () {
         $scope.editingFilter = null;
+        $scope.showAddNewFilter = true;
       };
 
       $scope.editDone = function () {

@@ -7,11 +7,12 @@ import angular from 'angular';
 import EventsProvider from 'ui/events';
 import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_flatten_filters';
 
-export default function (Private, $rootScope, getAppState, globalState, config) {
+export default function (Private, $rootScope, getAppState, globalState, config, $route) {
   let EventEmitter = Private(EventsProvider);
   let mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
 
   let queryFilter = new EventEmitter();
+  let counter = 0;
 
   queryFilter.getFilters = function () {
     let compareOptions = { disabled: true, negate: true };
@@ -38,6 +39,26 @@ export default function (Private, $rootScope, getAppState, globalState, config) 
     globalState.filters = validateStateFilters(globalState);
 
     return _.map(globalState.filters, appendStoreType('globalState'));
+  };
+
+  /**
+   * Adds new filter
+   */
+  queryFilter.addNewFilter = function () {
+    let newFilters = [];
+
+    let negate = false;
+    let disabled = true;
+    let dash = $route.current.locals.dash;
+    let indexId = dash.searchSource.get('index').id;
+    let filter = { meta: { disabled:disabled, negate: negate,
+      index: indexId}, query: { match: {} } };
+    ++counter;
+    let key = 'Enter Column Name' + counter;
+    let value = 'Enter Column Value' + counter;
+    filter.query.match[key] = { query: value, type: 'phrase' };
+    newFilters.push(filter);
+    queryFilter.addFilters(newFilters);
   };
 
   /**
