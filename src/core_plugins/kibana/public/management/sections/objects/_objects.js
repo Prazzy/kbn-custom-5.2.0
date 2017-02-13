@@ -60,6 +60,13 @@ uiModules.get('apps/management')
         });
       };
 
+      $scope.getSavedSearchTitle = function (id) {
+        if ($scope.services) {
+          let titleObj = find($scope.services[1].data, {'id': id});
+          if (titleObj) return titleObj.title;
+        }
+      };
+
       const refreshData = () => {
         return getData(this.advancedFilter);
       };
