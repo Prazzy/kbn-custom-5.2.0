@@ -262,7 +262,19 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
           if (currentFilter === filter) {
             self.hitCount = hits.total;
             self.hits = _.sortBy(hits.hits, 'title');
+            getSavedSearches();
           }
+        });
+      }
+
+      function getSavedSearches() {
+        let searches = services.searches;
+        searches.find()
+        .then(function (hits) {
+          _.map($scope.finder.hits, function (hit) {
+            let title = _.find(hits.hits, {'id': hit.savedSearchId});
+            if (title) hit.savedSearchtitle = title.title;
+          });
         });
       }
 

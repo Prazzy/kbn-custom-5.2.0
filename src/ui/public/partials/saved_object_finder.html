@@ -48,7 +48,8 @@
           ng-blur="finder.hitBlur($event)"
           ng-click="finder.preventClick($event)">
           <i aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></i>
-          <span>{{hit.title}}</span>
+          <span ng-if="!hit.savedSearchtitle">{{hit.title}}</span>
+          <span ng-if="hit.savedSearchtitle">{{hit.title}} ({{hit.savedSearchtitle}})</span>
           <p ng-if="hit.description" ng-bind="hit.description"></p>
       </a>
     </li>
