@@ -64,7 +64,8 @@ module.factory('SavedDashboard', function (courier, config) {
         section: { type: 'integer'},
         value: { type: 'integer'}
       }
-    }
+    },
+    fields: 'string'
   };
 
   SavedDashboard.searchsource = true;

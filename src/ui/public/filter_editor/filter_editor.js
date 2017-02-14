@@ -28,8 +28,8 @@ module.directive('filterEditor', function ($route, courier) {
 
       if ($scope.$root.chrome.getBreadcrumbs()[0].startsWith('dashboard')) {
         let dash = $route.current.locals.dash;
-        if (JSON.parse(dash.optionsJSON).fields) {
-          $scope.indexFields = JSON.parse(dash.optionsJSON).fields;
+        if (JSON.parse(dash.fields)) {
+          $scope.indexFields = JSON.parse(dash.fields);
           $scope.indexFieldNames = Object.keys($scope.indexFields).sort();
         }
       } else {

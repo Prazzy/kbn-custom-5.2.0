@@ -325,7 +325,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
         dash.refreshInterval = dash.timeRestore ? timeRestoreObj : undefined;
         // PAC Feature: collect all index fields added to a dashboard
-        if ($state.options.rebuildIndexFieldsList) $state.options.fields = $scope.indexFieldNames;
+        //if ($state.options.rebuildIndexFieldsList) $state.options.fields = $scope.indexFieldNames;
+        if ($state.options.rebuildIndexFieldsList) dash.fields = JSON.stringify($scope.indexFieldNames);
         dash.optionsJSON = angular.toJson($state.options);
         // PAC Feature: collect all index fields added to a dashboard
 
